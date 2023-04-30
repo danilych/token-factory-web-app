@@ -10,12 +10,13 @@ contract TokenFactory is Ownable {
     using SafeERC20 for IERC20;
     using SafeERC20 for Token;
 
-    uint256 commission;
-
     uint256 price;
 
-    constructor(uint256 commission_, uint256 price_) {
-        commission = commission_;
+    uint256 id;
+
+    mapping(uint256 => Token) public TokenToId;
+
+    constructor(uint256 price_) {
         price = price_;
     }
 
@@ -31,9 +32,15 @@ contract TokenFactory is Ownable {
 
         Token token = new Token(name, symbol, amount);
 
+        TokenToId[++id] = token;
+
         token.transferOwnership(_msgSender());
 
         token.safeTransfer(_msgSender(), amount);
+    }
+
+    function changePrice(uint256 price_) external onlyOwner {
+        price = price_;
     }
 
     function withdrawToken(address to, address token_) external onlyOwner {
