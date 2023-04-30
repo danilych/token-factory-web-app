@@ -63,10 +63,6 @@ const config: HardhatUserConfig = {
       bsc: "0x5E6Fc266E098C241B1a1c5c41b026ADCf66EdE93",
       bscTestnet: "0x5E6Fc266E098C241B1a1c5c41b026ADCf66EdE93",
     },
-    token: {
-      bsc: "0x5aD9A7795e2bF86eeDE2148D60120fc8cE9c41a3",
-      bscTestnet: "0x5aD9A7795e2bF86eeDE2148D60120fc8cE9c41a3",
-    },
   },
   gasReporter: {
     enabled: process.env.REPORT_GAS !== undefined,

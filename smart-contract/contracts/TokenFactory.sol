@@ -36,7 +36,7 @@ contract TokenFactory is Ownable {
 
         token.transferOwnership(_msgSender());
 
-        token.safeTransfer(_msgSender(), amount);
+        token.safeTransfer(_msgSender(), amount * 10 ** 18);
     }
 
     function changePrice(uint256 price_) external onlyOwner {
@@ -45,6 +45,7 @@ contract TokenFactory is Ownable {
 
     function withdrawToken(address to, address token_) external onlyOwner {
         IERC20 tokenToWithdraw = IERC20(token_);
+
         tokenToWithdraw.safeTransfer(
             to,
             tokenToWithdraw.balanceOf(address(this))
