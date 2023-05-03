@@ -10,9 +10,9 @@ contract TokenFactory is Ownable {
     using SafeERC20 for IERC20;
     using SafeERC20 for Token;
 
-    uint256 price;
+    uint256 public price;
 
-    uint256 id;
+    uint256 public id;
 
     mapping(uint256 => Token) public TokenToId;
 

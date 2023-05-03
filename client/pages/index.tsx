@@ -1,17 +1,29 @@
 import { Button, Label, TextInput } from "flowbite-react";
 import { useState } from "react";
-import { Toaster } from "react-hot-toast";
+import { Toaster, toast } from "react-hot-toast";
 import { ethers } from "ethers";
+import TokenFactoryArtifact from "../data/smart-contract/TokenFactory.json";
+import { useForm } from "react-hook-form";
 
 export default function Home() {
-  // const [isConnected, setIsConnected] = useState(false);
   const [account, setAccount] = useState("0x0000");
 
   const [isConnected, setIsConnected] = useState(false);
 
   let provider: any;
 
-  const [signer, setSigner] = useState();
+  let signer: any;
+
+  let contract: any;
+
+  const { register, handleSubmit } = useForm({
+    defaultValues: {
+      name: "",
+      symbol: "",
+      totalSupply: 0,
+    },
+    mode: "onChange",
+  });
 
   async function connectWallet() {
     if (window.ethereum == null) {
@@ -22,9 +34,17 @@ export default function Home() {
 
         const address = await provider.send("eth_requestAccounts", []);
 
+        signer = provider.getSigner();
+
         setAccount(address[0]);
 
-        setSigner(provider.getSigner());
+        contract = new ethers.Contract(
+          TokenFactoryArtifact.address,
+          TokenFactoryArtifact.abi,
+          provider
+        );
+
+        console.log("contract", contract);
 
         setIsConnected(true);
       } catch (error) {
@@ -33,6 +53,38 @@ export default function Home() {
         console.log(error);
       }
     }
+  }
+
+  async function createToken(values: any) {
+    if (!isConnected) {
+      toast.error("Please connect your wallet");
+      return;
+    }
+
+    const contractWithSigner = contract!.connect(signer);
+
+    const { name, symbol, totalSupply } = values;
+
+    console.log("name", name);
+
+    const price = await contract?.price();
+
+    console.log("price", price);
+
+    const overrides = {
+      value: price,
+    };
+
+    const tx = await contractWithSigner?.createToken(
+      name,
+      symbol,
+      totalSupply,
+      overrides
+    );
+
+    toast.success(
+      `Token was created success, you can check address using transaction hash in bscscan`
+    );
   }
 
   return (
@@ -51,7 +103,10 @@ export default function Home() {
         Create your own token in a few clicks
       </h1>
 
-      <form className="flex flex-col my-auto gap-4">
+      <form
+        className="flex flex-col my-auto gap-4"
+        onSubmit={handleSubmit(createToken)}
+      >
         <div>
           <div className="mb-2 block">
             <Label htmlFor="name" value="Token name" />
@@ -62,6 +117,7 @@ export default function Home() {
             type="name"
             placeholder="Ethereum"
             required={true}
+            {...register("name", { required: "Enter token name" })}
           />
         </div>
 
@@ -75,6 +131,7 @@ export default function Home() {
             type="symbol"
             placeholder="ETH"
             required={true}
+            {...register("symbol", { required: "Enter token symbol" })}
           />
         </div>
 
@@ -88,6 +145,9 @@ export default function Home() {
             type="total-supply"
             placeholder="1000000"
             required={true}
+            {...register("totalSupply", {
+              required: "Enter token total supply",
+            })}
           />
         </div>
 
